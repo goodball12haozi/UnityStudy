@@ -24,6 +24,7 @@ public partial class CameraRenderer
         this.context = context;
         this.camera = camera;
 
+        PrepareBuffer();
         PrepareForSceneWindow();
         if(!Cull())
         {
@@ -40,8 +41,13 @@ public partial class CameraRenderer
     void Setup()
     {
         if (context != null) context.SetupCameraProperties(camera);
-        buffer.ClearRenderTarget(true, true, Color.clear);
-        buffer.BeginSample(bufferName);
+        CameraClearFlags flags = camera.clearFlags;
+        buffer.ClearRenderTarget(
+            flags <= CameraClearFlags.Depth, 
+            flags <= CameraClearFlags.Color, 
+            flags == CameraClearFlags.Color ? camera.backgroundColor.linear : Color.clear
+        );
+        buffer.BeginSample(SampleName);
         ExecuteBuffer();
     }
 
@@ -68,7 +74,7 @@ public partial class CameraRenderer
 
     void Submit()
     {
-        buffer.EndSample(bufferName);
+        buffer.EndSample(SampleName);
         ExecuteBuffer();
         if (context != null) context.Submit();
     }

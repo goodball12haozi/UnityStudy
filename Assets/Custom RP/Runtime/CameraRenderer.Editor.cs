@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
 partial class CameraRenderer
@@ -9,6 +10,7 @@ partial class CameraRenderer
     partial void DrawGizmos();
     partial void PrepareForSceneWindow();
     partial void DrawUnsupportedShaders();
+    partial void PrepareBuffer();
 
 #if UNITY_EDITOR
     static ShaderTagId[] legacyShaderTagIds = {
@@ -21,6 +23,7 @@ partial class CameraRenderer
     };
 
     static Material errorMaterial;
+    string SampleName { get; set; }
 
     partial void DrawGizmos()
     {
@@ -54,5 +57,14 @@ partial class CameraRenderer
         var filteringSettings = FilteringSettings.defaultValue;
         context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
     }
+
+    partial void PrepareBuffer()
+    {
+        Profiler.BeginSample("Editor Only");
+        buffer.name = SampleName = camera.name;
+        Profiler.EndSample();
+    }
+#else
+    string SampleName => bufferName;
 #endif
 }
